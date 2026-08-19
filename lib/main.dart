@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'services/api_service.dart';
 import 'providers/auth_provider.dart';
 import 'screens/auth_gate.dart';
+import 'services/restaurant_service.dart';
 
 void main() {
   runApp(
@@ -11,6 +12,9 @@ void main() {
         Provider<ApiService>(create: (_) => ApiService()),
         ChangeNotifierProvider<AuthProvider>(
           create: (context) => AuthProvider(context.read<ApiService>()),
+        ),
+        Provider<RestaurantService>(
+          create: (context) => RestaurantService(context.read<ApiService>()),
         ),
       ],
       child: const MyApp(),
