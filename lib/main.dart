@@ -4,6 +4,8 @@ import 'services/api_service.dart';
 import 'providers/auth_provider.dart';
 import 'screens/auth_gate.dart';
 import 'services/restaurant_service.dart';
+import 'providers/cart_provider.dart';
+import 'services/order_service.dart';
 
 void main() {
   runApp(
@@ -15,6 +17,12 @@ void main() {
         ),
         Provider<RestaurantService>(
           create: (context) => RestaurantService(context.read<ApiService>()),
+        ),
+        ChangeNotifierProvider<CartProvider>(
+          create: (context) => CartProvider(),
+        ),
+        Provider<OrderService>(
+          create: (context) => OrderService(context.read<ApiService>()),
         ),
       ],
       child: const MyApp(),

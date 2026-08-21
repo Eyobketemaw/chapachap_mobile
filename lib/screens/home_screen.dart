@@ -5,6 +5,8 @@ import '../services/restaurant_service.dart';
 import '../models/restaurant.dart';
 import 'login_screen.dart';
 import 'restaurant_details_screen.dart';
+import '../providers/cart_provider.dart';
+import 'cart_screen.dart';
 
 // Home screen - now Stateful because it needs to fetch and hold onto
 // the restaurant list, plus track loading/error states while that
@@ -133,6 +135,48 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('ChapaChap'),
         backgroundColor: const Color.fromARGB(255, 170, 63, 55),
         actions: [
+          // Cart icon with item-count badge
+          Consumer<CartProvider>(
+            builder: (context, cart, child) {
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.shopping_cart),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CartScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  // Only show the badge if there's actually something in the cart
+                  if (cart.itemCount > 0)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Text(
+                          '${cart.itemCount}',
+                          style: const TextStyle(
+                            color: Color(0xFFB8342A),
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {

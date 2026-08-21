@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../services/restaurant_service.dart';
 import '../models/restaurant.dart';
 import '../models/menu_item.dart';
+import '../providers/cart_provider.dart';
 
 // Shows a single restaurant's details and menu items.
 // Takes the restaurant's id via constructor - the screen fetches full
@@ -171,7 +172,11 @@ class _RestaurantDetailsScreenState extends State<RestaurantDetailsScreen> {
           // List<Widget> - since we're inside a ListView's children
           // (not a separate ListView.builder), this is fine for a
           // menu-sized list rather than a huge scrollable feed.
-          ..._menuItems.map((item) => _MenuItemTile(item: item)),
+          ..._menuItems.map((item) => _MenuItemTile(
+      item: item,
+      restaurantId: restaurant.id,
+      restaurantName: restaurant.name,
+    )),
       ],
     );
   }
@@ -182,9 +187,14 @@ class _RestaurantDetailsScreenState extends State<RestaurantDetailsScreen> {
 // it's a repeated, self-contained visual unit.
 class _MenuItemTile extends StatelessWidget {
   final MenuItem item;
+  final int restaurantId;
+  final String restaurantName;
 
-  const _MenuItemTile({required this.item});
-
+  const _MenuItemTile({
+    required this.item,
+    required this.restaurantId,
+    required this.restaurantName,
+  });
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -248,9 +258,61 @@ class _MenuItemTile extends StatelessWidget {
               ),
             ),
 
-            // TODO: add-to-cart button goes here once Phase 3 (Cart) exists
+            // --- Add to cart button ---
+            IconButton(
+              icon: const Icon(Icons.add_circle, color: Color(0xFFB8342A), size: 32),
+              onPressed: () => _handleAddToCart(context),
+            ),
           ],
         ),
+      ),
+    );
+  }
+    void _handleAddToCart(BuildContext context) {
+    // read, not watch - we're calling a method once in response to a
+    // tap, not subscribing this button to rebuild on cart changes.
+    final cart = context.read<CartProvider>();
+
+    if (cart.wouldConflictWithRestaurant(restaurantId)) {
+      // Cart has items from a different restaurant - ask before wiping it.
+      showDialog(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Start a new order?'),
+          content: Text(
+            'Your cart has items from ${cart.restaurantName}. '
+            'Adding from $restaurantName will clear your current cart.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                cart.clearCart();
+                cart.addItem(item, restaurantId, restaurantName);
+                Navigator.pop(dialogContext);
+                _showAddedSnackBar(context);
+              },
+              child: const Text('Clear & Add'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      // No conflict - either cart is empty, or already has this
+      // restaurant's items. Just add directly.
+      cart.addItem(item, restaurantId, restaurantName);
+      _showAddedSnackBar(context);
+    }
+  }
+
+  void _showAddedSnackBar(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${item.name} added to cart'),
+        duration: const Duration(seconds: 1),
       ),
     );
   }
