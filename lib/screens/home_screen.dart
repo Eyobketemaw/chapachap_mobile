@@ -4,6 +4,7 @@ import '../providers/auth_provider.dart';
 import '../services/restaurant_service.dart';
 import '../models/restaurant.dart';
 import 'login_screen.dart';
+import 'restaurant_details_screen.dart';
 
 // Home screen - now Stateful because it needs to fetch and hold onto
 // the restaurant list, plus track loading/error states while that
@@ -61,7 +62,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildBody() {
     if (_isLoading) {
       return const Center(
-        child: CircularProgressIndicator(color: Color(0xFFB8342A)),
+        child: CircularProgressIndicator(
+          color: Color.fromARGB(255, 178, 61, 52),
+        ),
       );
     }
 
@@ -72,7 +75,11 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, color: Colors.red, size: 48),
+              const Icon(
+                Icons.error_outline,
+                color: Color(0xFFC9463D),
+                size: 48,
+              ),
               const SizedBox(height: 12),
               Text(
                 _error!,
@@ -121,10 +128,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final user = authProvider.currentUser;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: const Color.fromARGB(255, 240, 239, 239),
       appBar: AppBar(
         title: const Text('ChapaChap'),
-        backgroundColor: const Color(0xFFB8342A),
+        backgroundColor: const Color.fromARGB(255, 170, 63, 55),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -149,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Text(
                 'Hello, ${user?.name ?? 'there'}!',
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: Color.fromARGB(255, 0, 0, 0),
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -180,8 +187,15 @@ class _RestaurantCard extends StatelessWidget {
           Clip.antiAlias, // makes the image respect the card's rounded corners
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
-        // TODO: navigate to Restaurant Details screen once it exists
-        onTap: () {},
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  RestaurantDetailsScreen(restaurantId: restaurant.id),
+            ),
+          );
+        },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
